@@ -24,6 +24,7 @@ public class StudentController {
 		list.add(s2);
 		list.add(s3);
 		list.add(s4);
+		System.out.println("=========");
 	}
 	@RequestMapping("/list")
 	public String list(Model m){
