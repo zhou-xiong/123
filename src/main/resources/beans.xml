@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+xmlns="http://www.springframework.org/schema/beans" 
+xmlns:context="http://www.springframework.org/schema/context" 
+xmlns:aop="http://www.springframework.org/schema/aop"
+xmlns:tx="http://www.springframework.org/schema/tx" 
+xsi:schemaLocation="http://www.springframework.org/schema/beans 
+http://www.springframework.org/schema/beans/spring-beans-4.2.xsd 
+http://www.springframework.org/schema/context 
+http://www.springframework.org/schema/context/spring-context-4.2.xsd 
+http://www.springframework.org/schema/aop 
+http://www.springframework.org/schema/aop/spring-aop-4.2.xsd 
+http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx-4.2.xsd ">
+	<!--数据源  -->
+	<bean name="dataSource" class="org.springframework.jdbc.datasource.DriverManagerDataSource">
+		<property name="driverClassName" value="com.mysql.jdbc.Driver"></property>
+		<property name="url" value="jdbc:mysql:///6"></property>
+		<property name="username" value="root"></property>
+		<property name="password" value="root"></property>
+	</bean>
+	<!--sqlSession  -->
+	<bean id="sqlSessionFactory" class="org.mybatis.spring.SqlSessionFactoryBean">
+		<property name="dataSource" ref="dataSource"></property>
+		<property name="typeAliasesPackage" value="com.hl.pojo"></property>
+		<property name="plugins">
+			<array>
+				<bean class="com.github.pagehelper.PageInterceptor">
+					<property name="properties">
+						<value>helperDiacter=mysql</value>
+					</property>
+				</bean>
+			</array>
+		</property>
+	</bean>
+	<!--mapper包扫描  -->
+	<bean id="mapperScannerConfigurer" class="org.mybatis.spring.mapper.MapperScannerConfigurer">
+		<property name="sqlSessionFactory" ref="sqlSessionFactory"></property>
+		<property name="basePackage" value="com.hl.mapper"></property>
+	</bean>
+	<!-- 配置事务管理类 -->
+	<bean id="transactionManager"
+		class="org.springframework.jdbc.datasource.DataSourceTransactionManager">
+		<property name="dataSource" ref="dataSource"></property>
+	</bean>
+
+	<!-- 开启事务的注解 -->
+	<!-- <tx:annotation-driven transaction-manager="transactionManager"/> -->
+	<!-- 切面 事务的 -->
+	<aop:config>
+		<!-- 事务的作用范围 *:返回值；任意返回类型 -->
+		<aop:pointcut
+			expression="execution(* com.hanlin.service.*.*(..))"
+			id="aPoint" />
+		<!-- 事务  -->
+        <aop:advisor advice-ref="tAdvice" pointcut-ref="aPoint"/>
+	</aop:config>
+	<!--事务增强 -->
+	<tx:advice   transaction-manager="transactionManager"  id="tAdvice">
+		<!--事务的行为 -->
+		<tx:attributes>
+			<!--细节的 方法 -->
+			<tx:method name="add*" />
+			<tx:method name="update*" />
+			<tx:method name="del*" />
+			<tx:method name="sel*" read-only="true" />
+		</tx:attributes>
+ 	</tx:advice>
+	<!--声明事务  -->
+	<tx:annotation-driven transaction-manager="txManager"/>
+	<!--  <bean id="multipartResolver" class="org.springframework.web.multipart.commons.CommonsMultipartResolver">
+   <property name="defaultEncoding" value="utf-8"/>
+   50MB
+   <property name="maxUploadSize"  value="51200"/>
+   
+   </bean>  -->
+</beans>
